@@ -53,8 +53,8 @@ def main():
     for row in test_ans:
 
         #print("test triangle", i, ":", test_input[i])
-        #temp = []
-        my_sum = short_path_tab_wrap(test_input[i])
+        temp_tri = test_input[i]
+        my_sum = short_path_tab(temp_tri, temp_tri)
         #print("shortest sum path", i, ":", temp)
         print("shortest sum", i, ":", my_sum)
 
@@ -68,79 +68,65 @@ def main():
         i = i+1
     return
 
-def short_path_tab_wrap(tri):
-    h = 2
-    k = 0
-    i = 0
-    short_sum = 0
-    cur_small = tri[h][k] + tri[h+1][k]
+def short_path_tab(t_tri, tri):#solution #3
+    #t_tri = true triangle, original data
+    #tri = triangle, we update this with shortest path as we go
+    #h = hieght
+    #k = width
+    h = 2#start at second to last layer
 
-    while h < 3:
-        while k != -2 and k < 4:
-            left_small = tri[h][k] + tri[h+1][k]
-            right_small = tri[h][k] + tri [h+1][k+1]
-            if cur_small > left_small:
-                cur_small = left_small
-            if cur_small > right_small:
-                cur_small = right_small
+    while h >= 0:#loop through and do all the work once
+        k = 0
+        while k != -1 and k < 3:#while there is data and we are in range
+            left = tri[h+1][k]
+            right = tri[h+1][k+1]
+            if tri[h][k] == t_tri[h][k]:#check if work needs to be done
+                if left < right:
+                    tri[h][k] += tri[h+1][k]#update tri with shortest path
+                else:
+                    tri[h][k] += tri[h+1][k+1]#update tri with shortest path
             k += 1
         h -= 1
-    return
+    return tri[0][0]#return shortest path
 
-'''def short_path_tab_wrap_BAD(tri):
-    h = 3
-    i = 0
-    temp_k = 0
-    temp = tri[h][i]
+def short_path_memoize_wrap(t_tri, tri):#solution #2
+    #t_tri = true triangle, original data
+    #tri = triangle, we update this with shortest path as we go
+    h = 0 #hight
+    k = 0 #width
+    return short_path_memoize(t_tri, tri, h, k)
 
-
-#find the smallest number at the max hieght
-    while i < 3:
-        if tri[h][i] < temp:
-            temp = tri[h][i]
-            temp_k = i
-        i += 1
+def short_path_memoize(t_tri, tri, h, k):#solution #2
+    #t_tri = true triangle, original data
+    #tri = triangle, we update this with shortest path as we go
+    if h > 3 or k < 0:#base case out of range
+        return 0
     
-    #add smalest number to short_sum
-    short_sum = 0
-
-    #starting from the smallest number at the base of the triangle, recurse up
-    short_path_tab(tri, short_sum, h, temp_k)
-
-    return short_sum
-
-def short_path_tab_BAD(tri, short_sum, h, k):
-
-    if tri[h][k] < 0:
-        return 
+    if h == 3:#base case max hieght
+        return tri[h][k]
     
-    if k > 3:
-        return
+    if tri[h][k] != t_tri[h][k]:#check if work to be done
+        return tri[h][k]#early return if work already done
     
-    if h == 0:
-        short_sum += tri[h][k]
-        return
+    if tri[h+1][k] != -1:
+        left = short_path_memoize(t_tri, tri, h+1, k)
 
-    if tri[h-1][k] < tri[h-1][k+1]:
-        short_sum += tri[h][k]
-        short_path_tab(tri, short_sum, h-1, k)
+    if tri[h+1][k+1] != -1:
+        right = short_path_memoize(t_tri, tri, h+1, k+1)
+
+    if left < right:
+        tri[h][k] += left#update tri with work completed
+        return tri[h][k]
     else:
-        short_sum += tri[h][k]
-        short_path_tab(tri, short_sum, h-1, k+1)'''
+        tri[h][k] += right#update tri with work completed
+        return tri[h][k]
 
-
-def short_path_memoize_wrap(tri):
-    return
-
-def short_path_memoize(tri, h, k):
-    return
-
-def short_path_naive_wrap(tri):
+def short_path_naive_wrap(tri):#solution #1
     h = 0 #hight
     k = 0 #width
     return short_path_naive(tri, h, k)
 
-def short_path_naive(tri, h, k):
+def short_path_naive(tri, h, k):#solution #1
     if h > 3 or k < 0:
         return 0
     
@@ -154,50 +140,9 @@ def short_path_naive(tri, h, k):
         right = short_path_naive(tri, h+1, k+1)
 
     if left < right:
-        #temp.append(tri[h+1][k])
         return left + tri[h][k]
     else:
-        #temp.append(tri[h+1][k+1])
         return right + tri[h][k]
-        
-    
-
-'''def nchoose_naive(n, k):
-    if k == 1:
-        return n
-    if n == 1:
-        return 1
-    if k == n:
-        return 1
-    
-    #left child includes apples
-    #right child excludes apples
-    ans = nchoosek_naive(n-1, k-1) + nchoosek_naive(n-1, k)
-    return ans
-
-def nchoosek_memo(n,k, table):
-    if k == 1:
-        table[n][k] = n
-        return n
-    if k == n:
-        table[n][k] = 1
-        return 1
-    if table[n][k] != -1:
-        #someone else answered it
-        return table[n][k]
-
-    #do the work
-    ans = nchoosek_naive(n-1,k-1) + nchoosek_naive(n-1,k)
-    #add ans to the table
-    table[n][k] = ans
-    return ans
-
-def main():
-    n = 5
-    k = 3
-
-    table = [[-1]*(k+1) for _ in range(n+1)] #builds the table rows n, cols k
-    print(nchoosek_memo(n,k, table))'''
 
 if __name__ == "__main__":
     main()
