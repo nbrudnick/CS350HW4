@@ -13,6 +13,8 @@
     Solution #3 must be iterative and utilize dynamic programming, specifically Tabulation
 '''
 
+'''GOAL: find the shortest sum path from the top of the triangle to the bottom'''
+
 def main(): 
     tri1 = [ 
         [2, -1, -1, -1],
@@ -50,33 +52,95 @@ def main():
     i = 0
     for row in test_ans:
 
-        print("test triangle", i, ":", test_input[i])
-        temp = []
-        my_sum = short_path_naive_wrap(test_input[i], temp)
-        print("shortest sum path", i, ":", temp)
+        #print("test triangle", i, ":", test_input[i])
+        #temp = []
+        my_sum = short_path_tab_wrap(test_input[i])
+        #print("shortest sum path", i, ":", temp)
         print("shortest sum", i, ":", my_sum)
 
         print("correct shortest sum path", i, ":", row)
         good_sum = sum(row)
         print("correct shortest sum", i, ":", good_sum)
-        if temp == row and sum == good_sum:
+        if my_sum == good_sum:
             print("GOOD")
         else:
             print("BAD")
         i = i+1
     return
 
-#c(n,k) = c(n-1, k-1) + c(n-1, k)
-#base cases: 
-# k == 1 --> n
-# k == n --> 1
+def short_path_tab_wrap(tri):
+    h = 2
+    k = 0
+    i = 0
+    short_sum = 0
+    cur_small = tri[h][k] + tri[h+1][k]
 
-def short_path_naive_wrap(tri, temp):
+    while h < 3:
+        while k != -2 and k < 4:
+            left_small = tri[h][k] + tri[h+1][k]
+            right_small = tri[h][k] + tri [h+1][k+1]
+            if cur_small > left_small:
+                cur_small = left_small
+            if cur_small > right_small:
+                cur_small = right_small
+            k += 1
+        h -= 1
+    return
+
+'''def short_path_tab_wrap_BAD(tri):
+    h = 3
+    i = 0
+    temp_k = 0
+    temp = tri[h][i]
+
+
+#find the smallest number at the max hieght
+    while i < 3:
+        if tri[h][i] < temp:
+            temp = tri[h][i]
+            temp_k = i
+        i += 1
+    
+    #add smalest number to short_sum
+    short_sum = 0
+
+    #starting from the smallest number at the base of the triangle, recurse up
+    short_path_tab(tri, short_sum, h, temp_k)
+
+    return short_sum
+
+def short_path_tab_BAD(tri, short_sum, h, k):
+
+    if tri[h][k] < 0:
+        return 
+    
+    if k > 3:
+        return
+    
+    if h == 0:
+        short_sum += tri[h][k]
+        return
+
+    if tri[h-1][k] < tri[h-1][k+1]:
+        short_sum += tri[h][k]
+        short_path_tab(tri, short_sum, h-1, k)
+    else:
+        short_sum += tri[h][k]
+        short_path_tab(tri, short_sum, h-1, k+1)'''
+
+
+def short_path_memoize_wrap(tri):
+    return
+
+def short_path_memoize(tri, h, k):
+    return
+
+def short_path_naive_wrap(tri):
     h = 0 #hight
     k = 0 #width
-    return short_path_naive(tri, temp, h, k)
+    return short_path_naive(tri, h, k)
 
-def short_path_naive(tri, temp, h, k):
+def short_path_naive(tri, h, k):
     if h > 3 or k < 0:
         return 0
     
@@ -84,16 +148,16 @@ def short_path_naive(tri, temp, h, k):
         return tri[h][k]
     
     if tri[h+1][k] != -1:
-        left = short_path_naive(tri, temp, h+1, k)
+        left = short_path_naive(tri, h+1, k)
 
     if tri[h+1][k+1] != -1:
-        right = short_path_naive(tri, temp, h+1, k+1)
+        right = short_path_naive(tri, h+1, k+1)
 
     if left < right:
-        temp.append(tri[h+1][k])
+        #temp.append(tri[h+1][k])
         return left + tri[h][k]
     else:
-        temp.append(tri[h+1][k+1])
+        #temp.append(tri[h+1][k+1])
         return right + tri[h][k]
         
     
